@@ -340,7 +340,7 @@ class CourseGradeFactory(object):
             raise PermissionDenied("User does not have access to this course")
         return (
             self._get_saved_grade(course, course_structure) or
-            self._compute_and_update_grade(course, course_structure, read_only)
+            self._compute_and_update_grade(course, course_structure, read_only=read_only)
         )
 
     def update(self, course, course_structure):

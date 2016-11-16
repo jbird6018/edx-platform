@@ -7,6 +7,7 @@ from datetime import datetime
 import ddt
 from hashlib import sha1
 import json
+from mock import patch
 
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
@@ -14,6 +15,7 @@ from django.test import TestCase
 from django.utils.timezone import now
 from freezegun import freeze_time
 from opaque_keys.edx.locator import CourseLocator, BlockUsageLocator
+from track.request_id_utils import get_user_action_id, get_user_action_type
 
 from lms.djangoapps.grades.models import (
     BlockRecord,
@@ -299,6 +301,40 @@ class PersistentSubsectionGradeTest(GradesModelTestCase):
         self.assertIsInstance(grade.first_attempted, datetime)
         self.assertEqual(grade.earned_all, 6.0)
 
+    def test_update_or_create_event(self):
+        with patch('lms.djangoapps.grades.models.tracker') as tracker_mock:
+            grade = PersistentSubsectionGrade.update_or_create_grade(**self.params)
+        self._assert_tracker_emitted_event(tracker_mock, grade)
+
+    def test_create_event(self):
+        with patch('lms.djangoapps.grades.models.tracker') as tracker_mock:
+            grade = PersistentSubsectionGrade.create_grade(**self.params)
+        self._assert_tracker_emitted_event(tracker_mock, grade)
+
+    def _assert_tracker_emitted_event(self, tracker_mock, grade):
+        """
+        Helper function to ensure that the mocked event tracker
+        was called with the expected info based on the passed grade.
+        """
+        tracker_mock.emit.assert_called_with(
+            u'edx.grades.subsection.grade_calculated',
+            {
+                'user_id': unicode(grade.user_id),
+                'course_id': unicode(grade.course_id),
+                'block_id': unicode(grade.usage_key),
+                'course_version': unicode(grade.course_version),
+                'weighted_total_earned': grade.earned_all,
+                'weighted_total_possible': grade.possible_all,
+                'weighted_graded_earned': grade.earned_graded,
+                'weighted_graded_possible': grade.possible_graded,
+                'first_attempted': unicode(grade.first_attempted),
+                'subtree_edited_timestamp': unicode(grade.subtree_edited_timestamp),
+                'user_action_id': unicode(get_user_action_id()),
+                'user_action_type': unicode(get_user_action_type()),
+                'visible_blocks_hash': unicode(grade.visible_blocks_id),
+            }
+        )
+
 
 @ddt.ddt
 class PersistentCourseGradesTest(GradesModelTestCase):
@@ -322,7 +358,7 @@ class PersistentCourseGradesTest(GradesModelTestCase):
             ),
             "percent_grade": 77.7,
             "letter_grade": "Great job",
-            "passed": True
+            "passed": True,
         }
 
     def test_update(self):
@@ -386,7 +422,7 @@ class PersistentCourseGradesTest(GradesModelTestCase):
         read_grade = PersistentCourseGrade.read_course_grade(self.params["user_id"], self.params["course_id"])
         for param in self.params:
             if param == u'passed':
-                continue  # passed/passed_timestamp takes special handling, and is tested separately
+                continue  # # passed/passed_timestamp takes special handling, and is tested separately
             self.assertEqual(self.params[param], getattr(created_grade, param))
         self.assertIsInstance(created_grade.passed_timestamp, datetime)
         self.assertEqual(created_grade, read_grade)
@@ -402,7 +438,7 @@ class PersistentCourseGradesTest(GradesModelTestCase):
         ("letter_grade", None, IntegrityError),
         ("course_id", "Not a course key at all", AssertionError),
         ("user_id", None, IntegrityError),
-        ("grading_policy_hash", None, IntegrityError)
+        ("grading_policy_hash", None, IntegrityError),
     )
     @ddt.unpack
     def test_update_or_create_with_bad_params(self, param, val, error):
@@ -413,3 +449,28 @@ class PersistentCourseGradesTest(GradesModelTestCase):
     def test_grade_does_not_exist(self):
         with self.assertRaises(PersistentCourseGrade.DoesNotExist):
             PersistentCourseGrade.read_course_grade(self.params["user_id"], self.params["course_id"])
+
+    def test_update_or_create_event(self):
+        with patch('lms.djangoapps.grades.models.tracker') as tracker_mock:
+            grade = PersistentCourseGrade.update_or_create_course_grade(**self.params)
+        self._assert_tracker_emitted_event(tracker_mock, grade)
+
+    def _assert_tracker_emitted_event(self, tracker_mock, grade):
+        """
+        Helper function to ensure that the mocked event tracker
+        was called with the expected info based on the passed grade.
+        """
+        tracker_mock.emit.assert_called_with(
+            u'edx.grades.course.grade_calculated',
+            {
+                'user_id': unicode(grade.user_id),
+                'course_id': unicode(grade.course_id),
+                'course_version': unicode(grade.course_version),
+                'percent_grade': grade.percent_grade,
+                'letter_grade': unicode(grade.letter_grade),
+                'course_edited_timestamp': unicode(grade.course_edited_timestamp),
+                'user_action_id': unicode(get_user_action_id()),
+                'user_action_type': unicode(get_user_action_type()),
+                'grading_policy_hash': unicode(grade.grading_policy_hash),
+            }
+        )

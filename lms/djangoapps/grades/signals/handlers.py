@@ -2,14 +2,19 @@
 Grades related signals.
 """
 
-from django.dispatch import receiver
 from logging import getLogger
 
-from courseware.model_data import get_score, set_score
+from django.dispatch import receiver
 from openedx.core.lib.grade_utils import is_score_higher
-from student.models import user_by_anonymous_id
 from submissions.models import score_set, score_reset
 
+from courseware.model_data import get_score, set_score
+from student.models import user_by_anonymous_id
+from track.request_id_utils import (
+    get_user_action_type,
+    get_user_action_id,
+    set_user_action_type,
+    create_new_user_action_id
 from .signals import (
     PROBLEM_RAW_SCORE_CHANGED,
     PROBLEM_WEIGHTED_SCORE_CHANGED,
@@ -19,7 +24,6 @@ from .signals import (
 from ..new.course_grade import CourseGradeFactory
 from ..scores import weighted_score
 from ..tasks import recalculate_subsection_grade
-
 
 log = getLogger(__name__)
 
@@ -120,7 +124,7 @@ def score_published_handler(sender, block, user, raw_earned, raw_possible, only_
             user_id=user.id,
             course_id=unicode(block.location.course_key),
             usage_id=unicode(block.location),
-            only_if_higher=only_if_higher,
+            only_if_higher=only_if_higher
         )
     return update_score
 
@@ -183,3 +187,16 @@ def recalculate_course_grade(sender, course, course_structure, user, **kwargs): 
     Updates a saved course grade.
     """
     CourseGradeFactory(user).update(course, course_structure)
+
+
+def _validate_tracking_info(default_root_type):
+    """
+    Gets the current user action information
+    or initializes it using the specified type.
+    """
+    root_id = get_user_action_id()
+    root_type = get_user_action_type()
+    if not root_id:
+        create_new_user_action_id()
+    if not root_type:
+        set_user_action_type(default_root_type)
