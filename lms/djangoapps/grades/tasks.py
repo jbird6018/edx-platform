@@ -54,6 +54,12 @@ def recalculate_subsection_grade(
         return
 
     score_deleted = kwargs['score_deleted']
+
+    # the request cache is not maintained on celery workers,
+    # where this code runs. So we take the values from the
+    # main request cache and store them in the local request
+    # cache. This correlates model-level grading events with
+    # higher-level ones.
     create_new_user_action_id(kwargs.get('user_action_id', None))
     set_user_action_type(kwargs.get('user_action_type', None))
     scored_block_usage_key = UsageKey.from_string(usage_id).replace(course_key=course_key)
@@ -159,8 +165,6 @@ def _update_subsection_grades(
             weighted_earned,
             weighted_possible,
             score_deleted,
-            get_user_action_id(),
-            get_user_action_type(),
             exc,
         )
 
@@ -173,8 +177,6 @@ def _retry_recalculate_subsection_grade(
         weighted_earned,
         weighted_possible,
         score_deleted,
-        user_action_id,
-        user_action_type,
         exc=None,
 ):
     """
@@ -190,8 +192,8 @@ def _retry_recalculate_subsection_grade(
             weighted_earned=weighted_earned,
             weighted_possible=weighted_possible,
             score_deleted=score_deleted,
-            user_action_id=user_action_id,
-            user_action_type=user_action_type,
+            user_action_id=unicode(get_user_action_id()),
+            user_action_type=unicode(get_user_action_type()),
         ),
         exc=exc,
     )

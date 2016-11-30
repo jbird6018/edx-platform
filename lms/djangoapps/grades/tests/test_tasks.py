@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from mock import patch
 from unittest import skip
+from uuid import uuid4
 
 from student.models import anonymous_id_for_user
 from student.tests.factories import UserFactory
@@ -67,6 +68,8 @@ class RecalculateSubsectionGradeTest(ModuleStoreTestCase):
             ('weighted_earned', 1.0),
             ('weighted_possible', 2.0),
             ('score_deleted', False),
+            ('user_action_id', unicode(uuid4())),
+            ('user_action_type', 'type'),
         ])
 
         # this call caches the anonymous id on the user object, saving 4 queries in all happy path tests

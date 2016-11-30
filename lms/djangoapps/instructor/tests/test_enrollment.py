@@ -13,6 +13,7 @@ import mock
 from mock import patch
 from nose.plugins.attrib import attr
 from opaque_keys.edx.locations import SlashSeparatedCourseKey
+from uuid import uuid4
 
 from capa.tests.response_xml_factory import MultipleChoiceResponseXMLFactory
 from ccx_keys.locator import CCXLocator
@@ -556,11 +557,12 @@ class TestStudentModuleGrading(SharedModuleStoreTestCase):
     @patch('lms.djangoapps.instructor.enrollment.tracker')
     @patch('track.request_id_utils.uuid4')
     def test_delete_student_state(self, mock_uuid, tracker_mock, _crum_mock):
+        permanent_uuid = uuid4()
+        mock_uuid.return_value = permanent_uuid
         problem_location = self.problem.location
         self._get_subsection_grade_and_verify(0, 1, 0, 1)
         answer_problem(course=self.course, request=self.request, problem=self.problem, score=1, max_value=1)
         self._get_subsection_grade_and_verify(1, 1, 1, 1)
-        mock_uuid.return_value = 'fake uuid'
         # Delete student state using the instructor dash
         reset_student_attempts(
             self.course.id,
@@ -580,7 +582,7 @@ class TestStudentModuleGrading(SharedModuleStoreTestCase):
                 'course_id': unicode(self.course.id),
                 'problem_id': unicode(self.problem.location),
                 'instructor_username': unicode(self.instructor.username),
-                'user_action_id': u'fake uuid',
+                'user_action_id': unicode(permanent_uuid),
                 'user_action_type': u'edx.grades.problem.state_deleted',
             }
         )

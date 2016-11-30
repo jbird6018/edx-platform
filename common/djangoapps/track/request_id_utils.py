@@ -24,9 +24,13 @@ def get_user_action_type():
 
 def create_new_user_action_id(explicit_id=None):
     """
-    Generates a new UUID and stores it in the request cache
+    If explicit_id is provided, sets the user action id to
+    a UUID object generated from explicit_id.
+    If not, generates a new UUID and stores it
     as the user action id.
-    If explicit_id is provided, sets the 
+    
+    explicit_id must be a parsable string version
+    of a UUID.
     """
     new_id = UUID(explicit_id) if explicit_id else uuid4()
     get_cache('grade_tracking')['user_action_id'] = new_id
