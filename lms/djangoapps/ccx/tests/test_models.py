@@ -152,46 +152,6 @@ class TestCCX(ModuleStoreTestCase):
         """verify that a ccx without a due date has not ended"""
         self.assertFalse(self.ccx.has_ended())  # pylint: disable=no-member
 
-    # ensure that the expected localized format will be found by the i18n
-    # service
-    @patch('util.date_utils.ugettext', fake_ugettext(translations={
-        "SHORT_DATE_FORMAT": "%b %d, %Y",
-    }))
-    def test_start_datetime_short_date(self):
-        """verify that the start date for a ccx formats properly by default"""
-        start = datetime(2015, 1, 1, 12, 0, 0, tzinfo=utc)
-        expected = "Jan 01, 2015"
-        self.set_ccx_override('start', start)
-        actual = self.ccx.start_datetime_text()  # pylint: disable=no-member
-        self.assertEqual(expected, actual)
-
-    @patch('util.date_utils.ugettext', fake_ugettext(translations={
-        "DATE_TIME_FORMAT": "%b %d, %Y at %H:%M",
-    }))
-    def test_start_datetime_date_time_format(self):
-        """verify that the DATE_TIME format also works as expected"""
-        start = datetime(2015, 1, 1, 12, 0, 0, tzinfo=utc)
-        expected = "Jan 01, 2015 at 12:00 UTC"
-        self.set_ccx_override('start', start)
-        actual = self.ccx.start_datetime_text('DATE_TIME')  # pylint: disable=no-member
-        self.assertEqual(expected, actual)
-
-    @ddt.data((datetime(2015, 11, 1, 8, 59, 00, tzinfo=utc), "Nov 01, 2015", "Nov 01, 2015 at 01:59 PDT"),
-              (datetime(2015, 11, 1, 9, 00, 00, tzinfo=utc), "Nov 01, 2015", "Nov 01, 2015 at 01:00 PST"))
-    @ddt.unpack
-    def test_start_date_time_zone(self, start_date_time, expected_short_date, expected_date_time):
-        """
-        verify that start date is correctly converted when time zone specified
-        during normal daylight hours and daylight savings hours
-        """
-        time_zone = timezone('America/Los_Angeles')
-
-        self.set_ccx_override('start', start_date_time)
-        actual_short_date = self.ccx.start_datetime_text(time_zone=time_zone)  # pylint: disable=no-member
-        actual_datetime = self.ccx.start_datetime_text('DATE_TIME', time_zone)  # pylint: disable=no-member
-        self.assertEqual(expected_short_date, actual_short_date)
-        self.assertEqual(expected_date_time, actual_datetime)
-
     @patch('util.date_utils.ugettext', fake_ugettext(translations={
         "SHORT_DATE_FORMAT": "%b %d, %Y",
     }))

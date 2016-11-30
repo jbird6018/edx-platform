@@ -84,18 +84,6 @@ class CustomCourseForEdX(models.Model):
 
         return datetime.now(utc) > self.due
 
-    def start_datetime_text(self, format_string="SHORT_DATE", time_zone=utc):
-        """Returns the desired text representation of the CCX start datetime
-
-        The returned value is in specified time zone, defaulted to UTC.
-        """
-        i18n = self.course.runtime.service(self.course, "i18n")
-        strftime = i18n.strftime
-        value = strftime(self.start.astimezone(time_zone), format_string)
-        if format_string == 'DATE_TIME':
-            value += ' ' + get_time_zone_abbr(time_zone, self.start)
-        return value
-
     def end_datetime_text(self, format_string="SHORT_DATE", time_zone=utc):
         """Returns the desired text representation of the CCX due datetime
 

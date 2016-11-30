@@ -117,43 +117,6 @@ def _datetime_to_string(date_time, format_string, time_zone, strftime_localized)
     )
 
 
-def course_start_datetime_text(start_date, advertised_start, format_string, time_zone, ugettext, strftime_localized):
-    """
-    Calculates text to be shown to user regarding a course's start
-    datetime in specified time zone.
-
-    Prefers .advertised_start, then falls back to .start.
-
-    Arguments:
-        start_date (datetime): the course's start datetime
-        advertised_start (str): the course's advertised start date
-        format_string (str): the date format type, as passed to strftime
-        time_zone (pytz time zone): the time zone to convert to
-        ugettext ((str) -> str): a text localization function
-        strftime_localized ((datetime, str) -> str): a localized string
-            formatting function
-    """
-    if advertised_start is not None:
-        # TODO: This will return an empty string if advertised_start == ""... consider changing this behavior?
-        try:
-            # from_json either returns a Date, returns None, or raises a ValueError
-            parsed_advertised_start = Date().from_json(advertised_start)
-            if parsed_advertised_start is not None:
-                # In the Django implementation of strftime_localized, if
-                # the year is <1900, _datetime_to_string will raise a ValueError.
-                return _datetime_to_string(parsed_advertised_start, format_string, time_zone, strftime_localized)
-        except ValueError:
-            pass
-        return advertised_start.title()
-    elif start_date != DEFAULT_START_DATE:
-        return _datetime_to_string(start_date, format_string, time_zone, strftime_localized)
-    else:
-        _ = ugettext
-        # Translators: TBD stands for 'To Be Determined' and is used when a course
-        # does not yet have an announced start date.
-        return _('TBD')
-
-
 def course_end_datetime_text(end_date, format_string, time_zone, strftime_localized):
     """
     Returns a formatted string for a course's end date or datetime.

@@ -18,7 +18,6 @@ from xmodule.course_metadata_utils import (
     has_course_ended,
     DEFAULT_START_DATE,
     course_start_date_is_default,
-    course_start_datetime_text,
     course_end_datetime_text,
     may_certify_for_course,
 )
@@ -168,55 +167,6 @@ class CourseMetadataUtilsTestCase(TestCase):
                 TestScenario((test_datetime, None), False),
                 TestScenario((DEFAULT_START_DATE, advertised_start_parsable), False),
                 TestScenario((DEFAULT_START_DATE, None), True),
-            ]),
-            FunctionTest(course_start_datetime_text, [
-                # Test parsable advertised start date.
-                # Expect start datetime to be parsed and formatted back into a string.
-                TestScenario(
-                    (DEFAULT_START_DATE, advertised_start_parsable, 'DATE_TIME',
-                     utc, noop_gettext, mock_strftime_localized),
-                    mock_strftime_localized(Date().from_json(advertised_start_parsable), 'DATE_TIME') + " UTC"
-                ),
-                # Test un-parsable advertised start date.
-                # Expect date parsing to throw a ValueError, and the advertised
-                # start to be returned in Title Case.
-                TestScenario(
-                    (test_datetime, advertised_start_unparsable, 'DATE_TIME',
-                     utc, noop_gettext, mock_strftime_localized),
-                    advertised_start_unparsable.title()
-                ),
-                # Test parsable advertised start date from before January 1, 1900.
-                # Expect mock_strftime_localized to throw a ValueError, and the
-                # advertised start to be returned in Title Case.
-                TestScenario(
-                    (test_datetime, advertised_start_bad_date, 'DATE_TIME',
-                     utc, noop_gettext, mock_strftime_localized),
-                    advertised_start_bad_date.title()
-                ),
-                # Test without advertised start date, but with a set start datetime.
-                # Expect formatted datetime to be returned.
-                TestScenario(
-                    (test_datetime, None, 'SHORT_DATE', utc, noop_gettext, mock_strftime_localized),
-                    mock_strftime_localized(test_datetime, 'SHORT_DATE')
-                ),
-                # Test without advertised start date and with default start datetime.
-                # Expect TBD to be returned.
-                TestScenario(
-                    (DEFAULT_START_DATE, None, 'SHORT_DATE', utc, noop_gettext, mock_strftime_localized),
-                    'TBD'
-                ),
-                # Test correctly formatted start datetime is returned during normal daylight hours
-                TestScenario(
-                    (DEFAULT_START_DATE, time_zone_normal_parsable, 'DATE_TIME',
-                     timezone('Europe/Paris'), noop_gettext, mock_strftime_localized),
-                    "DATE_TIME " + "2016-03-27 01:59:00 CET"
-                ),
-                # Test correctly formatted start datetime is returned during daylight savings hours
-                TestScenario(
-                    (DEFAULT_START_DATE, time_zone_daylight_parsable, 'DATE_TIME',
-                     timezone('Europe/Paris'), noop_gettext, mock_strftime_localized),
-                    "DATE_TIME " + "2016-03-27 03:00:00 CEST"
-                )
             ]),
             FunctionTest(course_end_datetime_text, [
                 # Test with a set end datetime.

@@ -403,9 +403,6 @@ class ProgramDataExtender(object):
     def _attach_run_mode_marketing_url(self, run_mode):
         run_mode['marketing_url'] = get_run_marketing_url(self.course_key, self.user)
 
-    def _attach_run_mode_start_date(self, run_mode):
-        run_mode['start_date'] = self.course_overview.start_datetime_text()
-
     def _attach_run_mode_upgrade_url(self, run_mode):
         required_mode_slug = run_mode['mode_slug']
         enrolled_mode_slug, _ = CourseEnrollment.enrollment_mode_for_user(self.user, self.course_key)

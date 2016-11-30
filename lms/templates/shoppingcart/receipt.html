@@ -304,17 +304,13 @@ from openedx.core.lib.courses import course_image_url
             <p class="course-meta-info" aria-describedby="course-title">
               <span class="course-dates-title">
                 <%
-                    course_start_time = course.start_datetime_text()
                     course_end_time = course.end_datetime_text()
                 %>
-                % if course_start_time or course_end_time:
+                % if course_end_time:
                   ${_("Course Dates")}:
                 %endif
               </span>
               <span class="course-display-dates">
-                % if course_start_time:
-                  ${course_start_time}
-                %endif
                 -
                 % if course_end_time:
                   ${course_end_time}

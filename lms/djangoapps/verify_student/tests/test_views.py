@@ -514,7 +514,6 @@ class TestPayAndVerifyView(UrlResetMixin, ModuleStoreTestCase, XssTestMixin):
             response,
             unicode(course.id),
             course.display_name,
-            course.start_datetime_text(),
             courseware_url
         )
 
