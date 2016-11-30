@@ -96,46 +96,6 @@ def course_start_date_is_default(start, advertised_start):
     return advertised_start is None and start == DEFAULT_START_DATE
 
 
-def _datetime_to_string(date_time, format_string, time_zone, strftime_localized):
-    """
-    Formats the given datetime with the given function and format string.
-
-    Adds time zone abbreviation to the resulting string if the format is DATE_TIME or TIME.
-
-    Arguments:
-        date_time (datetime): the datetime to be formatted
-        format_string (str): the date format type, as passed to strftime
-        time_zone (pytz time zone): the time zone to convert to
-        strftime_localized ((datetime, str) -> str): a nm localized string
-            formatting function
-    """
-    result = strftime_localized(date_time.astimezone(time_zone), format_string)
-    abbr = get_time_zone_abbr(time_zone, date_time)
-    return (
-        result + ' ' + abbr if format_string in ['DATE_TIME', 'TIME', 'DAY_AND_TIME']
-        else result
-    )
-
-
-def course_end_datetime_text(end_date, format_string, time_zone, strftime_localized):
-    """
-    Returns a formatted string for a course's end date or datetime.
-
-    If end_date is None, an empty string will be returned.
-
-    Arguments:
-        end_date (datetime): the end datetime of a course
-        format_string (str): the date format type, as passed to strftime
-        time_zone (pytz time zone): the time zone to convert to
-        strftime_localized ((datetime, str) -> str): a localized string
-            formatting function
-    """
-    return (
-        _datetime_to_string(end_date, format_string, time_zone, strftime_localized) if end_date is not None
-        else ''
-    )
-
-
 def may_certify_for_course(certificates_display_behavior, certificates_show_before_end, has_ended):
     """
     Returns whether it is acceptable to show the student a certificate download

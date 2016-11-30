@@ -1211,7 +1211,6 @@ class CourseDescriptor(CourseFields, SequenceDescriptor, LicenseMixin):
         """Return the course_id for this course"""
         return self.location.course_key
 
-
     @property
     def start_date_is_still_default(self):
         """
@@ -1221,17 +1220,6 @@ class CourseDescriptor(CourseFields, SequenceDescriptor, LicenseMixin):
         return course_metadata_utils.course_start_date_is_default(
             self.start,
             self.advertised_start
-        )
-
-    def end_datetime_text(self, format_string="SHORT_DATE", time_zone=utc):
-        """
-        Returns the end date or date_time for the course formatted as a string.
-        """
-        return course_metadata_utils.course_end_datetime_text(
-            self.end,
-            format_string,
-            time_zone,
-            self.runtime.service(self, "i18n").strftime
         )
 
     def get_discussion_blackout_datetimes(self):

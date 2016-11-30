@@ -370,18 +370,6 @@ class CourseOverview(TimeStampedModel):
             self.advertised_start,
         )
 
-    def end_datetime_text(self, format_string="SHORT_DATE", time_zone=utc):
-        """
-        Returns the end date or datetime for the course formatted as a string.
-
-        """
-        return course_metadata_utils.course_end_datetime_text(
-            self.end,
-            format_string,
-            time_zone,
-            strftime_localized
-        )
-
     @property
     def sorting_score(self):
         """

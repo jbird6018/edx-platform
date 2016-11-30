@@ -34,11 +34,6 @@ from openedx.core.lib.courses import course_image_url
         <div class="course-title">
           <h1>
             ${_("{course_name}").format(course_name=course.display_name) | h}
-              <span class="course-dates">
-                ${_("{end_date}").format(
-                  end_date=course.end_datetime_text()
-                )}
-              </span>
           </h1>
         </div>
         <hr>

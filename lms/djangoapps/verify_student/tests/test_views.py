@@ -965,12 +965,11 @@ class TestPayAndVerifyView(UrlResetMixin, ModuleStoreTestCase, XssTestMixin):
             else:
                 self.assertFalse(displayed, msg="Expected '{req}' requirement to be hidden".format(req=req))
 
-    def _assert_course_details(self, response, course_key, display_name, start_text, url):
+    def _assert_course_details(self, response, course_key, display_name, url):
         """Check the course information on the page. """
         response_dict = self._get_page_data(response)
         self.assertEqual(response_dict['course_key'], course_key)
         self.assertEqual(response_dict['course_name'], display_name)
-        self.assertEqual(response_dict['course_start_date'], start_text)
         self.assertEqual(response_dict['courseware_url'], url)
 
     def _assert_user_details(self, response, full_name):

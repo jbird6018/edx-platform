@@ -246,36 +246,6 @@ class IsNewCourseTestCase(unittest.TestCase):
         descriptor = get_dummy_course(start='2012-12-31T12:00')
         assert descriptor.is_newish is True
 
-    def test_end_date_text(self):
-        # No end date set, returns empty string.
-        d = get_dummy_course('2012-12-02T12:00')
-        self.assertEqual('', d.end_datetime_text())
-
-        d = get_dummy_course('2012-12-02T12:00', end='2014-9-04T12:00')
-        self.assertEqual('Sep 04, 2014', d.end_datetime_text())
-
-    def test_end_date_time_text(self):
-        # No end date set, returns empty string.
-        course = get_dummy_course('2012-12-02T12:00')
-        self.assertEqual('', course.end_datetime_text("DATE_TIME"))
-
-        course = get_dummy_course('2012-12-02T12:00', end='2014-9-04T12:00')
-        self.assertEqual('Sep 04, 2014 at 12:00 UTC', course.end_datetime_text("DATE_TIME"))
-
-    @ddt.data(("2015-11-01T08:59", 'Nov 01, 2015', u'Nov 01, 2015 at 01:59 PDT'),
-              ("2015-11-01T09:00", 'Nov 01, 2015', u'Nov 01, 2015 at 01:00 PST'))
-    @ddt.unpack
-    def test_end_date_time_zone(self, course_date, expected_short_date, expected_date_time):
-        """
-        Test that end datetime text correctly formats datetimes
-        for normal daylight hours and daylight savings hours
-        """
-        time_zone = timezone('America/Los_Angeles')
-        course = get_dummy_course(course_date, end=course_date)
-
-        self.assertEqual(course.end_datetime_text(time_zone=time_zone), expected_short_date)
-        self.assertEqual(course.end_datetime_text("DATE_TIME", time_zone), expected_date_time)
-
 
 class DiscussionTopicsTestCase(unittest.TestCase):
     def test_default_discussion_topics(self):

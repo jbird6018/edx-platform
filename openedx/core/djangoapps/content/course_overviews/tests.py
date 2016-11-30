@@ -127,8 +127,6 @@ class CourseOverviewTestCase(ModuleStoreTestCase):
             ('clean_id', ('#',)),
             ('has_ended', ()),
             ('has_started', ()),
-            ('end_datetime_text', ('SHORT_DATE',)),
-            ('end_datetime_text', ('DATE_TIME',)),
             ('may_certify', ()),
         ]
         for method_name, method_args in methods_to_test:

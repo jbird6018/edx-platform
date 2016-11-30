@@ -18,7 +18,6 @@ from xmodule.course_metadata_utils import (
     has_course_ended,
     DEFAULT_START_DATE,
     course_start_date_is_default,
-    course_end_datetime_text,
     may_certify_for_course,
 )
 from xmodule.fields import Date
@@ -167,30 +166,6 @@ class CourseMetadataUtilsTestCase(TestCase):
                 TestScenario((test_datetime, None), False),
                 TestScenario((DEFAULT_START_DATE, advertised_start_parsable), False),
                 TestScenario((DEFAULT_START_DATE, None), True),
-            ]),
-            FunctionTest(course_end_datetime_text, [
-                # Test with a set end datetime.
-                # Expect formatted datetime to be returned.
-                TestScenario(
-                    (test_datetime, 'TIME', utc, mock_strftime_localized),
-                    mock_strftime_localized(test_datetime, 'TIME') + " UTC"
-                ),
-                # Test with default end datetime.
-                # Expect empty string to be returned.
-                TestScenario(
-                    (None, 'TIME', utc, mock_strftime_localized),
-                    ""
-                ),
-                # Test correctly formatted end datetime is returned during normal daylight hours
-                TestScenario(
-                    (time_zone_normal_datetime, 'TIME', timezone('Europe/Paris'), mock_strftime_localized),
-                    "TIME " + "2016-03-27 01:59:00 CET"
-                ),
-                # Test correctly formatted end datetime is returned during daylight savings hours
-                TestScenario(
-                    (time_zone_daylight_datetime, 'TIME', timezone('Europe/Paris'), mock_strftime_localized),
-                    "TIME " + "2016-03-27 03:00:00 CEST"
-                )
             ]),
             FunctionTest(may_certify_for_course, [
                 TestScenario(('early_with_info', True, True), True),
