@@ -10,10 +10,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 from math import exp
 
-from openedx.core.lib.time_zone_utils import get_time_zone_abbr
 from pytz import utc
-
-from .fields import Date
 
 DEFAULT_START_DATE = datetime(2030, 1, 1, tzinfo=utc)
 
