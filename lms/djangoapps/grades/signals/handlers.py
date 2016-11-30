@@ -9,12 +9,14 @@ from openedx.core.lib.grade_utils import is_score_higher
 from submissions.models import score_set, score_reset
 
 from courseware.model_data import get_score, set_score
+from eventtracking import tracker
 from student.models import user_by_anonymous_id
 from track.request_id_utils import (
     get_user_action_type,
     get_user_action_id,
     set_user_action_type,
     create_new_user_action_id
+)
 from .signals import (
     PROBLEM_RAW_SCORE_CHANGED,
     PROBLEM_WEIGHTED_SCORE_CHANGED,
@@ -162,6 +164,19 @@ def enqueue_subsection_update(sender, **kwargs):  # pylint: disable=unused-argum
     Handles the PROBLEM_WEIGHTED_SCORE_CHANGED signal by
     enqueueing a subsection update operation to occur asynchronously.
     """
+    _validate_tracking_info('edx.grades.problem.submitted')
+    tracker.emit(
+        u'edx.grades.problem.submitted',
+        {
+            'user_id': unicode(kwargs['user_id']),
+            'course_id': unicode(kwargs['course_id']),
+            'problem_id': unicode(kwargs['usage_id']),
+            'user_action_id': unicode(get_user_action_id()),
+            'user_action_type': unicode(get_user_action_type()),
+            'weighted_earned': kwargs.get('weighted_earned'),
+            'weighted_possible': kwargs.get('weighted_possible'),
+        }
+    )
     result = recalculate_subsection_grade.apply_async(
         kwargs=dict(
             user_id=kwargs['user_id'],
@@ -171,6 +186,8 @@ def enqueue_subsection_update(sender, **kwargs):  # pylint: disable=unused-argum
             weighted_earned=kwargs.get('weighted_earned'),
             weighted_possible=kwargs.get('weighted_possible'),
             score_deleted=kwargs.get('score_deleted', False),
+            user_action_id=unicode(get_user_action_id()),
+            user_action_type=unicode(get_user_action_type()),
         )
     )
     log.info(

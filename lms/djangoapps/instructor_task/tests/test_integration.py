@@ -425,13 +425,22 @@ class TestRescoringTask(TestIntegrationTask):
             self.check_state(user, descriptor, 0, 1, expected_attempts=2)
 
     @patch('lms.djangoapps.instructor_task.tasks_helper.tracker')
+    @patch('lms.djangoapps.grades.signals.handlers.tracker')
     @patch('lms.djangoapps.grades.models.tracker')
-    def test_rescoring_events(self, grades_tracker, instructor_task_tracker):
+    def test_rescoring_events(self, grades_tracker, handlers_tracker, instructor_task_tracker):
         problem_edit = dict(correct_answer=OPTION_2)
         self.verify_rescore_for_one_student(
             problem_edit, 0, 2, rescore_if_higher=False,
         )
         user_action_id = instructor_task_tracker.method_calls[0][1][1]['user_action_id']
+        calls_after_rescore = [
+            call for call in grades_tracker.method_calls
+            if call[1][1]['user_action_type'] == u'edx.grades.problem.rescored'
+        ]
+        # check that events caused by the rescore (and not the initial
+        # problem submission) have the expected id
+        for call in calls_after_rescore:
+            self.assertEqual(user_action_id, call[1][1]['user_action_id'])
 
         instructor_task_tracker.emit.assert_called_with(
             u'edx.grades.problem.rescored',
@@ -447,6 +456,19 @@ class TestRescoringTask(TestIntegrationTask):
                 'instructor_username': u'instructor',
                 'user_action_id': user_action_id,
                 'user_action_type': u'edx.grades.problem.rescored',
+            }
+        )
+
+        handlers_tracker.emit.assert_called_with(
+            u'edx.grades.problem.submitted',
+            {
+                'user_id': unicode(self.user1.id),
+                'user_action_id': user_action_id,
+                'user_action_type': u'edx.grades.problem.rescored',
+                'course_id': unicode(self.course.id),
+                'problem_id': unicode(InstructorTaskModuleTestCase.problem_location('H1P1')),
+                'weighted_earned': 0,
+                'weighted_possible': 2,
             }
         )
 

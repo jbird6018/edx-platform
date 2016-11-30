@@ -326,8 +326,8 @@ def _fire_score_changed_for_block(
     if block and block.has_score and block.max_score() is not None:
         PROBLEM_RAW_SCORE_CHANGED.send(
             sender=None,
-            raw_possible=0,
-            raw_earned=block.max_score(),
+            raw_earned=0,
+            raw_possible=block.max_score(),
             weight=getattr(block, 'weight', None),
             user_id=student.id,
             course_id=unicode(course_id),

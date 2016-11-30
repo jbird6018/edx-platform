@@ -74,8 +74,9 @@ class DeleteStateEventIntegrationTest(ProblemSubmissionTestMixin, SharedModuleSt
         self.instructor = UserFactory.create(is_staff=True, username=u'test_instructor', password=u'test')
 
     @patch('lms.djangoapps.instructor.enrollment.tracker')
+    @patch('lms.djangoapps.grades.signals.handlers.tracker')
     @patch('lms.djangoapps.grades.models.tracker')
-    def test_delete_student_state_events(self, models_tracker, enrollment_tracker):
+    def test_delete_student_state_events(self, models_tracker, handlers_tracker, enrollment_tracker):
         # submit answer
         StudentModule.objects.create(
             student=self.student,
@@ -94,6 +95,19 @@ class DeleteStateEventIntegrationTest(ProblemSubmissionTestMixin, SharedModuleSt
         for call in models_tracker.method_calls:
             self.assertEqual(user_action_id, call[1][1]['user_action_id'])
             self.assertEqual(u'edx.grades.problem.state_deleted', call[1][1]['user_action_type'])
+
+        handlers_tracker.emit.assert_called_with(
+            u'edx.grades.problem.submitted',
+            {
+                'user_id': unicode(self.student.id),
+                'user_action_id': user_action_id,
+                'user_action_type': u'edx.grades.problem.state_deleted',
+                'course_id': unicode(self.course.id),
+                'problem_id': unicode(self.problem.location),
+                'weighted_earned': 0,
+                'weighted_possible': 1,
+            }
+        )
 
         course = modulestore().get_course(self.course.id, depth=0)
         models_tracker.emit.assert_called_with(
