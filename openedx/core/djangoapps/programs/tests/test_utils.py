@@ -745,7 +745,6 @@ class TestProgramDataExtender(ProgramsApiConfigMixin, ModuleStoreTestCase):
                 is_enrolled=False,
                 is_enrollment_open=True,
                 marketing_url=MARKETING_URL,
-                start_date=strftime_localized(self.course.start, 'SHORT_DATE'),
                 upgrade_url=None,
             ),
             **kwargs

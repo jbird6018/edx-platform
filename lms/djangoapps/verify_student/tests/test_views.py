@@ -1000,7 +1000,6 @@ class TestPayAndVerifyView(UrlResetMixin, ModuleStoreTestCase, XssTestMixin):
             'full_name': pay_and_verify_div['data-full-name'],
             'course_key': pay_and_verify_div['data-course-key'],
             'course_name': pay_and_verify_div['data-course-name'],
-            'course_start_date': pay_and_verify_div['data-course-start-date'],
             'courseware_url': pay_and_verify_div['data-courseware-url'],
             'course_mode_name': pay_and_verify_div['data-course-mode-name'],
             'course_mode_slug': pay_and_verify_div['data-course-mode-slug'],
