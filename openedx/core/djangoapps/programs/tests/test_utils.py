@@ -739,7 +739,6 @@ class TestProgramDataExtender(ProgramsApiConfigMixin, ModuleStoreTestCase):
                 course_image_url=course_overview.course_image_url,
                 course_key=unicode(self.course.id),  # pylint: disable=no-member
                 course_url=reverse('course_root', args=[self.course.id]),  # pylint: disable=no-member
-                end_date=strftime_localized(self.course.end, 'SHORT_DATE'),
                 enrollment_open_date=strftime_localized(utils.DEFAULT_ENROLLMENT_START_DATE, 'SHORT_DATE'),
                 is_course_ended=self.course.end < timezone.now(),
                 is_enrolled=False,
